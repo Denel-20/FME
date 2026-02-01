@@ -150,13 +150,13 @@
                 <b style="font-size: 1.1em; color: #2ecc71;">목표: 지뢰 개수 계산이 틀린 '오류'를 찾으세요!</b>
             </div>
             
-            <p>1.<b>기억 단계 (2초)</b><br>
+            <p>1. <b>기억 단계 (2초)</b><br>
             잠시 나타나는 <b>지뢰(@)</b>의 위치를 머릿속에 저장하세요.</p>
             
-            <p>2️.<b>추론 단계 (4초)</b><br>
+            <p>2️. <b>추론 단계 (4초)</b><br>
             숫자가 나타납니다. 각 숫자는 <b>주변 8칸의 지뢰 개수</b>와 일치해야 합니다. 계산이 잘못된 숫자를 모두 클릭하세요.</p>
             
-            <p>3️.<b>점수 획득</b><br>
+            <p>3️. <b>점수 획득</b><br>
             정답을 모두 맞히면 <b>현재 지뢰 개수만큼</b> 점수가 올라가며 다음 레벨로 넘어갑니다.</p>
         </div>
         <button onclick="startGame()">도전 시작</button>
@@ -182,7 +182,6 @@
         }
 
         function startGame() {
-            // 브라우저의 소리 차단 정책 해제용
             clickSound.play().then(() => clickSound.pause()).catch(() => {});
             
             state.rows = 3; state.cols = 3; state.mines = 1; state.score = 0; state.level = 1;
@@ -214,14 +213,14 @@
                 }
             }
             
-            statusEl.textContent = "지뢰 위치 기억 (2초)";
+            statusEl.textContent = "지뢰 위치 기억하세요";
             timerBar.style.backgroundColor = '#f39c12'; 
             animateTimer(2000, enterPlayPhase);
         }
 
         function enterPlayPhase() {
             state.phase = 'play';
-            statusEl.textContent = "틀린 숫자 선택 (4초)";
+            statusEl.textContent = "틀린 숫자 선택하세요";
             timerBar.style.backgroundColor = '#3498db';
 
             const realValues = Array.from({ length: state.rows }, () => Array(state.cols).fill(0));
@@ -260,7 +259,7 @@
                     cell.onclick = () => {
                         if (state.phase !== 'play') return;
                         
-                        playSound(); // 사운드 재생 호출
+                        playSound();
 
                         const key = `${r},${c}`;
                         if (state.selectedCells.has(key)) {
@@ -305,7 +304,7 @@
                 statusEl.textContent = "실패...";
                 setTimeout(() => {
                     document.getElementById('overlay-title').textContent = "게임 오버";
-                    document.getElementById('overlay-desc').innerHTML = `최종 점수: ${state.score}<br><br>다시 도전하려면 아래 버튼을 누르세요.`;
+                    document.getElementById('overlay-desc').innerHTML = `최종 점수: <b>${state.score}</b><br><br>다시 도전하려면 아래 버튼을 누르세요.`;
                     overlay.classList.remove('hidden');
                 }, 1500);
             }
@@ -333,4 +332,5 @@
     </script>
 </body>
 </html>
+
 
