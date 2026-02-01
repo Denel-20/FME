@@ -137,7 +137,7 @@
             padding: 15px 50px; font-size: 22px; background-color: var(--success);
             color: white; border: none; border-radius: 50px; cursor: pointer;
             font-weight: bold; box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
-            margin-top: 10px;
+            margin-top: 15px;
         }
 
         .hidden { display: none !important; }
@@ -194,6 +194,7 @@
         }
 
         function startGame() {
+            // 사운드 잠금 해제용
             clickSound.play().then(function() {
                 clickSound.pause();
                 clickSound.currentTime = 0;
@@ -302,7 +303,9 @@
                     };
                 }
             }
-            animateTimer(4000, finishRound);
+
+            const playTime = 2000 + (state.mines * 1000);
+            animateTimer(playTime, finishRound);
         }
 
         function finishRound() {
