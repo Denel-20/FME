@@ -4,20 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>지뢰 오류 찾기</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/NeoDunggeunmo.css">
     <style>
         :root {
             --bg-color: #2c3e50;
             --board-bg: #34495e;
             --cell-bg: #ecf0f1;
             --cell-selected: #3498db;
-            --accent: #e74c3c;
+            --accent: #7f8c8d;
             --success: #2ecc71;
-            --missed: #f39c12;
+            --missed: #95a5a6;
             --text-color: #ecf0f1;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'NeoDunggeunmo', sans-serif;
             background-color: var(--bg-color);
             color: var(--text-color);
             display: flex;
@@ -31,27 +32,22 @@
         }
 
         .game-title {
-            font-size: 24px;
-            font-weight: 800;
+            font-size: 28px;
             margin-bottom: 20px;
-            color: #ffffff;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
-            letter-spacing: -1px;
+            text-shadow: 2px 2px 0px rgba(0,0,0,0.5);
         }
         
         .info-panel {
             display: flex;
             gap: 20px;
             margin-bottom: 20px;
-            font-size: 18px;
-            background: rgba(0,0,0,0.2);
+            background: rgba(0,0,0,0.3);
             padding: 10px 20px;
-            border-radius: 8px;
+            border-radius: 4px;
         }
 
         .status-msg {
             height: 30px;
-            font-weight: bold;
             color: #f1c40f;
             margin-bottom: 10px;
         }
@@ -59,7 +55,7 @@
         .timer-bar-container {
             width: 300px;
             height: 10px;
-            background: #555;
+            background: #222;
             border-radius: 5px;
             margin-bottom: 20px;
             overflow: hidden;
@@ -73,11 +69,10 @@
 
         #game-board {
             display: grid;
-            gap: 4px;
+            gap: 5px;
             background-color: var(--board-bg);
             padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+            border-radius: 4px;
         }
 
         .cell {
@@ -87,59 +82,55 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 28px;
             font-weight: bold;
             color: #2c3e50;
             cursor: pointer;
-            border-radius: 4px;
-            box-sizing: border-box;
-            border: none;
+            border-bottom: 4px solid #bdc3c7;
         }
 
-        .cell.mine { background-color: var(--accent); color: white; }
+        .cell.mine { 
+            background-color: #95a5a6; 
+            color: #000; 
+            filter: grayscale(100%);
+        }
+        
         .cell.selected { background-color: var(--cell-selected); color: white; }
         .cell.correct { background-color: var(--success); color: white; }
-        .cell.wrong { background-color: var(--accent); color: white; }
-        .cell.missed { background-color: var(--missed); color: white; }
+        .cell.wrong { background-color: #e74c3c; color: white; }
+        .cell.missed { background-color: var(--missed); color: #2c3e50; }
 
         #overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
             background: rgba(0,0,0,0.95);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             z-index: 10;
-            padding: 20px;
         }
 
-        #overlay h2 {
-            margin-bottom: 0px;
-        }
+        #overlay h2 { margin-bottom: 5px; font-size: 32px; }
 
         .how-to {
             max-width: 450px;
             text-align: center;
             line-height: 1.8;
             background: rgba(255, 255, 255, 0.05);
-            padding: 25px;
-            border-radius: 15px;
+            padding: 20px;
             margin: 10px 0 20px 0;
-            font-size: 16px;
         }
 
         .final-score-box {
-            font-size: 48px;
-            font-weight: 800;
+            font-size: 60px;
             color: #f1c40f;
             margin: 0;
-            text-shadow: 0 0 20px rgba(241, 196, 15, 0.5);
         }
 
         #start-button {
-            padding: 15px 50px; font-size: 22px; background-color: var(--success);
-            color: white; border: none; border-radius: 50px; cursor: pointer;
-            font-weight: bold; box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
-            margin-top: 15px;
+            padding: 15px 50px; font-size: 20px; background-color: var(--success);
+            color: white; border: none; border-bottom: 4px solid #27ae60; cursor: pointer;
+            font-family: 'NeoDunggeunmo';
         }
 
+        #start-button:active { border-bottom: 0; transform: translateY(4px); }
         .hidden { display: none !important; }
     </style>
 </head>
@@ -149,7 +140,7 @@
     
     <div class="info-panel">
         <div>점수: <span id="score">0</span></div>
-        <div>찾을 오류: <span id="target-count">0</span></div>
+        <div>오류: <span id="target-count">0</span></div>
         <div>단계: <span id="level-display">1</span></div>
     </div>
 
@@ -164,9 +155,9 @@
     <div id="overlay">
         <h2 id="overlay-title">게임 설명</h2>
         <div class="how-to" id="overlay-desc">
-            1단계 : 2초 동안 지뢰의 위치를 기억하세요. <br>
-            2단계 : 지뢰가 사라진 후 숫자 계산이 틀린 칸을 모두 클릭하세요. <br>
-            3단계 : 성공하면 지뢰 개수만큼 점수를 얻습니다. <br>
+            1. 2초간 💣︎ 의 위치를 기억하세요. <br>
+            2. 숫자가 잘못된 칸을 모두 클릭하세요. <br>
+            3. 성공 시 지뢰 개수만큼 점수 획득! <br>
         </div>
         <button id="start-button" onclick="startGame()">게임 시작</button>
     </div>
@@ -188,18 +179,7 @@
         const overlayDesc = document.getElementById('overlay-desc');
         const startButton = document.getElementById('start-button');
 
-        function playSound() {
-            clickSound.currentTime = 0;
-            clickSound.play().catch(function(e) {});
-        }
-
         function startGame() {
-            // 사운드 잠금 해제용
-            clickSound.play().then(function() {
-                clickSound.pause();
-                clickSound.currentTime = 0;
-            }).catch(function(e) {});
-
             state.rows = 3; state.cols = 3; state.mines = 1; state.score = 0; state.level = 1;
             overlay.classList.add('hidden');
             startLevel();
@@ -223,30 +203,26 @@
                     cell.className = 'cell';
                     if (state.mineLocations.has(r + "," + c)) {
                         cell.classList.add('mine');
-                        cell.textContent = '@';
+                        cell.textContent = '💣︎';
                     }
                     boardEl.appendChild(cell);
                 }
             }
             
-            statusEl.textContent = "지뢰 위치를 기억하세요";
+            statusEl.textContent = "지뢰 위치 기억 중...";
             timerBar.style.backgroundColor = '#f39c12'; 
             animateTimer(2000, enterPlayPhase);
         }
 
         function enterPlayPhase() {
             state.phase = 'play';
-            statusEl.textContent = "틀린 숫자를 모두 찾으세요";
+            statusEl.textContent = "오류를 모두 찾으세요!";
             timerBar.style.backgroundColor = '#3498db';
 
-            const realValues = Array.from({ length: state.rows }, function() {
-                return Array(state.cols).fill(0);
-            });
+            const realValues = Array.from({ length: state.rows }, () => Array(state.cols).fill(0));
 
-            state.mineLocations.forEach(function(loc) {
-                const parts = loc.split(',');
-                const mr = parseInt(parts[0]);
-                const mc = parseInt(parts[1]);
+            state.mineLocations.forEach(loc => {
+                const [mr, mc] = loc.split(',').map(Number);
                 for (let r = mr - 1; r <= mr + 1; r++) {
                     for (let c = mc - 1; c <= mc + 1; c++) {
                         if (r >= 0 && r < state.rows && c >= 0 && c < state.cols && (r !== mr || c !== mc)) {
@@ -259,13 +235,11 @@
             let errorCandidates = [];
             for(let r=0; r<state.rows; r++) {
                 for(let c=0; c<state.cols; c++) {
-                    if (!state.mineLocations.has(r + "," + c)) {
-                        errorCandidates.push(r + "," + c);
-                    }
+                    if (!state.mineLocations.has(r + "," + c)) errorCandidates.push(r + "," + c);
                 }
             }
             
-            errorCandidates.sort(function() { return Math.random() - 0.5; });
+            errorCandidates.sort(() => Math.random() - 0.5);
             for(let i=0; i < Math.min(state.mines, errorCandidates.length); i++) {
                 state.errorLocations.add(errorCandidates[i]);
             }
@@ -276,7 +250,6 @@
                 for (let c = 0; c < state.cols; c++) {
                     const cell = cells[idx++];
                     cell.className = 'cell';
-                    
                     let val = state.mineLocations.has(r + "," + c) ? 0 : realValues[r][c];
 
                     if (state.errorLocations.has(r + "," + c)) {
@@ -291,7 +264,6 @@
                     
                     cell.onclick = function() {
                         if (state.phase !== 'play') return;
-                        playSound();
                         const key = r + "," + c;
                         if (state.selectedCells.has(key)) {
                             state.selectedCells.delete(key);
@@ -303,7 +275,6 @@
                     };
                 }
             }
-
             const playTime = 2000 + (state.mines * 1000);
             animateTimer(playTime, finishRound);
         }
@@ -321,22 +292,18 @@
                     const isError = state.errorLocations.has(key);
                     
                     cell.classList.remove('selected'); 
-                    
-                    if (isSelected && isError) {
-                        cell.classList.add('correct');
-                        correct++;
-                    } else if (isSelected && !isError) {
-                        cell.classList.add('wrong');
-                        wrong++;
-                    } else if (!isSelected && isError) {
-                        cell.classList.add('missed');
+                    if (isSelected && isError) { cell.classList.add('correct'); correct++; }
+                    else if (isSelected && !isError) { cell.classList.add('wrong'); wrong++; }
+                    else if (!isSelected && isError) { 
+                        cell.classList.add('missed'); 
+                        if (state.mineLocations.has(key)) cell.textContent = '💣︎';
                     }
                 }
             }
 
             if (correct === state.errorLocations.size && wrong === 0) {
-                statusEl.textContent = "성공 " + state.mines + "점 획득";
-                setTimeout(function() {
+                statusEl.textContent = "SUCCESS!";
+                setTimeout(() => {
                     state.score += state.mines; 
                     if (state.level % 2 !== 0) state.rows === state.cols ? state.cols++ : state.rows++;
                     else state.mines++;
@@ -344,11 +311,11 @@
                     startLevel();
                 }, 1500);
             } else {
-                statusEl.textContent = "게임 실패";
-                setTimeout(function() {
+                statusEl.textContent = "FAILED";
+                setTimeout(() => {
                     overlayTitle.textContent = "게임 종료";
-                    overlayDesc.innerHTML = "<div class='final-score-box'>" + state.score + " 점</div>";
-                    startButton.textContent = "다시 시작하기";
+                    overlayDesc.innerHTML = "<div class='final-score-box'>" + state.score + "</div>";
+                    startButton.textContent = "다시 도전";
                     overlay.classList.remove('hidden');
                 }, 1000);
             }
