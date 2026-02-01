@@ -144,17 +144,25 @@
     <div id="game-board"></div>
 
     <div id="overlay">
-        <h2 id="overlay-title">게임 방법</h2>
+        <h2 id="overlay-title">게임 설명</h2>
         <div class="how-to" id="overlay-desc">
-            1. <b>지뢰 위치 기억:</b> 2초간 지뢰(@) 위치를 외우세요.<br>
-            2. <b>오류 선택:</b> 실제 지뢰 개수와 숫자가 다른 칸을 모두 클릭하세요.<br>
-            3. <b>사운드 오류 해결:</b> 오디오 파일 이름이 <b>決定ボタンを押す32.mp3</b> 인지 확인해주세요.
+            <div style="margin-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.2); padding-bottom: 10px;">
+                <b style="font-size: 1.1em; color: #2ecc71;">목표: 지뢰 개수 계산이 틀린 '오류'를 찾으세요!</b>
+            </div>
+            
+            <p>1.<b>기억 단계 (2초)</b><br>
+            잠시 나타나는 <b>지뢰(@)</b>의 위치를 머릿속에 저장하세요.</p>
+            
+            <p>2️.<b>추론 단계 (4초)</b><br>
+            숫자가 나타납니다. 각 숫자는 <b>주변 8칸의 지뢰 개수</b>와 일치해야 합니다. 계산이 잘못된 숫자를 모두 클릭하세요.</p>
+            
+            <p>3️.<b>점수 획득</b><br>
+            정답을 모두 맞히면 <b>현재 지뢰 개수만큼</b> 점수가 올라가며 다음 레벨로 넘어갑니다.</p>
         </div>
-        <button onclick="startGame()">게임 시작</button>
+        <button onclick="startGame()">도전 시작</button>
     </div>
 
     <script>
-        // 업로드하신 실제 파일명으로 수정
         const clickSound = new Audio('buttonSound.mp3');
 
         let state = {
@@ -325,3 +333,4 @@
     </script>
 </body>
 </html>
+
