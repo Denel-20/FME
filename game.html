@@ -30,6 +30,15 @@
             touch-action: manipulation;
         }
 
+        .game-title {
+            font-size: 32px;
+            font-weight: 800;
+            margin-bottom: 20px;
+            color: #ffffff;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: -1px;
+        }
+        
         .info-panel {
             display: flex;
             gap: 20px;
@@ -132,7 +141,9 @@
     </style>
 </head>
 <body>
-
+    
+    <div class="game-title">지뢰 오류 찾기</div>
+    
     <div class="info-panel">
         <div>점수: <span id="score">0</span></div>
         <div>찾을 오류: <span id="target-count">0</span></div>
@@ -359,3 +370,4 @@
     </script>
 </body>
 </html>
+
