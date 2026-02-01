@@ -150,13 +150,15 @@
         <div class="how-to" id="overlay-desc">
             1. <b>기억 단계 (2초):</b> 화면에 표시된 지뢰(@)의 위치를 기억하세요.<br>
             2. <b>추론 단계 (4초):</b> 숫자가 지뢰 개수와 맞는지 확인하세요.<br>
-            3. <b>점수 획득:</b> 성공 시 <b>현재 지뢰 개수만큼</b> 점수가 올라갑니다!<br>
-            4. <b>결과 확인:</b> 시간이 다 되면 자동으로 채점됩니다.
+            3. <b>오류 선택:</b> 틀린 숫자를 클릭하세요. (다시 누르면 취소됩니다)<br>
+            4. <b>결과 확인:</b> 성공 시 지뢰 개수만큼 점수를 획득합니다.
         </div>
         <button onclick="startGame()">게임 시작</button>
     </div>
 
     <script>
+        const buttonSound = new Audio('https://github.com/user-attachments/files/24989485/buttomSound.mp3');
+
         let state = {
             rows: 3, cols: 3, mines: 1, score: 0, level: 1,
             mineLocations: new Set(), errorLocations: new Set(), selectedCells: new Set(),
@@ -198,14 +200,14 @@
                 }
             }
             
-            statusEl.textContent = "지뢰 위치 기억 (2초)";
+            statusEl.textContent = "지뢰 위치 기억";
             timerBar.style.backgroundColor = '#f39c12'; 
             animateTimer(2000, enterPlayPhase);
         }
 
         function enterPlayPhase() {
             state.phase = 'play';
-            statusEl.textContent = "틀린 숫자 선택 (4초)";
+            statusEl.textContent = "틀린 숫자 선택";
             timerBar.style.backgroundColor = '#3498db';
 
             const realValues = Array.from({ length: state.rows }, () => Array(state.cols).fill(0));
@@ -243,6 +245,10 @@
                     
                     cell.onclick = () => {
                         if (state.phase !== 'play') return;
+                        
+                        buttonSound.currentTime = 0;
+                        buttonSound.play().catch(e => console.log("사운드 재생 실패:", e));
+
                         const key = `${r},${c}`;
                         if (state.selectedCells.has(key)) {
                             state.selectedCells.delete(key);
@@ -276,9 +282,7 @@
             if (correct === state.mines && wrong === 0) {
                 statusEl.textContent = `성공! +${state.mines}점`;
                 setTimeout(() => {
-                    // 지뢰 개수만큼 점수 증가
                     state.score += state.mines; 
-                    
                     if (state.level % 2 !== 0) state.rows === state.cols ? state.cols++ : state.rows++;
                     else state.mines++;
                     state.level++;
