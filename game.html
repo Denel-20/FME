@@ -116,7 +116,6 @@
             z-index: 10; padding: 20px;
         }
 
-        /* 오버레이용 게임 타이틀 스타일 */
         .overlay-game-title {
             font-size: 40px;
             font-weight: 900;
@@ -329,7 +328,7 @@
                 }
             }
 
-            const playTime = 2000 + (state.mines * 800);
+            const playTime = 2000 + (state.mines * 500);
             animateTimer(playTime, finishRound, true);
         }
 
@@ -419,6 +418,7 @@
     </script>
 </body>
 </html>
+
 
 
 
