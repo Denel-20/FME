@@ -116,6 +116,23 @@
             z-index: 10; padding: 20px;
         }
 
+        /* 오버레이용 게임 타이틀 스타일 */
+        .overlay-game-title {
+            font-size: 42px;
+            font-weight: 900;
+            color: #f1c40f;
+            text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
+            margin-bottom: 5px;
+            letter-spacing: -1px;
+        }
+
+        #overlay h2 {
+            margin-top: 0;
+            color: #ecf0f1;
+            font-size: 20px;
+            opacity: 0.8;
+        }
+
         .how-to {
             max-width: 450px; text-align: center; line-height: 1.8;
             background: rgba(255, 255, 255, 0.05); padding: 25px;
@@ -151,10 +168,11 @@
     </div>
 
     <div id="overlay">
+        <div class="overlay-game-title">지뢰 오류 찾기</div>
         <h2 id="overlay-title">게임 설명</h2>
         <div class="how-to" id="overlay-desc">
             1단계 : 게임 시작 후 나타나는 폭탄의 위치를 정해진 시간 동안 기억합니다.<br>
-            2단계 : 폭탄가 숫자로 가려지면, 주변 폭탄 개수와 맞지 않는 틀린 숫자 칸을 찾아 클릭합니다.<br>
+            2단계 : 폭탄이 숫자로 가려지면, 주변 폭탄 개수와 맞지 않는 틀린 숫자 칸을 찾아 클릭합니다.<br>
             3단계 : 모든 오류를 정확히 찾아내면 다음 단계로 넘어가며, 난이도와 획득 점수가 함께 올라갑니다.<br>
         </div>
         <button id="start-button" onclick="startGame()">게임 시작</button>
@@ -360,7 +378,7 @@
             } else {
                 statusEl.textContent = "실패";
                 setTimeout(function() {
-                    overlayTitle.textContent = "게임 오";
+                    overlayTitle.textContent = "게임 오버";
                     overlayDesc.innerHTML = `<div class='final-score-box'>${state.score}<span class='unit'>점</span></div>`;
                     startButton.textContent = "다시 시작하기";
                     overlay.classList.remove('hidden');
@@ -394,4 +412,3 @@
     </script>
 </body>
 </html>
-
