@@ -30,20 +30,23 @@
             touch-action: manipulation;
         }
 
+        /* 상태 안내 메시지 (중앙 상단) */
         .status-msg {
-            height: 30px;
+            height: 40px;
             font-weight: bold;
             color: #f1c40f;
-            margin-bottom: 10px;
-            font-size: 18px;
+            margin-bottom: 5px;
+            font-size: 1.2rem;
+            text-align: center;
         }
 
+        /* 타이머 바 */
         .timer-bar-container {
             width: 300px;
-            height: 10px;
+            height: 8px;
             background: #555;
-            border-radius: 5px;
-            margin-bottom: 20px;
+            border-radius: 4px;
+            margin-bottom: 30px;
             overflow: hidden;
         }
         .timer-bar {
@@ -52,29 +55,29 @@
             background: var(--success);
         }
 
+        /* 게임 보드 레이아웃 */
         #game-board {
             display: grid;
-            gap: 4px;
+            gap: 6px;
             background-color: var(--board-bg);
-            padding: 10px;
-            border-radius: 8px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-            margin-bottom: 20px;
+            padding: 12px;
+            border-radius: 12px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
         }
 
         .cell {
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
             background-color: var(--cell-bg);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 24px;
+            font-size: 26px;
             font-weight: bold;
             color: #2c3e50;
             cursor: pointer;
-            border-radius: 4px;
-            box-sizing: border-box;
+            border-radius: 6px;
+            transition: background-color 0.2s;
         }
 
         .cell.mine { background-color: var(--accent); color: white; }
@@ -83,48 +86,49 @@
         .cell.wrong { background-color: var(--accent); color: white; }
         .cell.missed { background-color: var(--missed); color: white; }
 
+        /* 하단 카운터 스타일 */
         .selection-counter {
-            font-size: 20px;
-            font-weight: bold;
-            margin-top: 10px;
-            color: #ecf0f1;
+            margin-top: 30px;
+            font-size: 40px;
+            font-weight: 900;
+            color: #ffffff;
+            transition: color 0.2s;
         }
 
+        /* 초과 시 흔들림 애니메이션 */
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            50% { transform: translateX(10px); }
+            75% { transform: translateX(-10px); }
+            100% { transform: translateX(0); }
+        }
+
+        .shake-effect {
+            animation: shake 0.3s ease-in-out;
+            color: var(--accent);
+        }
+
+        /* 결과 창 오버레이 */
         #overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.95);
+            background: rgba(0,0,0,0.96);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             z-index: 10;
-            padding: 20px;
-        }
-
-        .how-to {
-            max-width: 450px;
-            text-align: center;
-            line-height: 1.8;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 25px;
-            border-radius: 15px;
-            margin-bottom: 20px;
         }
 
         .final-score-box {
-            font-size: 60px;
-            font-weight: 800;
+            font-size: 70px;
+            font-weight: 900;
             color: #f1c40f;
-            text-shadow: 0 0 20px rgba(241, 196, 15, 0.5);
+            margin-bottom: 25px;
         }
-
-        .final-score-box span.unit {
-            font-size: 0.33em;
-            margin-left: 8px;
-            color: #ecf0f1;
-        }
+        .final-score-box span.unit { font-size: 0.3em; color: #fff; margin-left: 10px; }
 
         #start-button {
-            padding: 15px 50px; font-size: 22px; background-color: var(--success);
+            padding: 18px 60px; font-size: 24px; background-color: var(--success);
             color: white; border: none; border-radius: 50px; cursor: pointer;
-            font-weight: bold; box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+            font-weight: bold; box-shadow: 0 8px 20px rgba(46, 204, 113, 0.4);
         }
 
         .hidden { display: none !important; }
@@ -132,7 +136,7 @@
 </head>
 <body>
     
-    <div class="status-msg" id="status-msg">준비하세요</div>
+    <div class="status-msg" id="status-msg"></div>
 
     <div class="timer-bar-container">
         <div class="timer-bar" id="timer-bar"></div>
@@ -140,14 +144,11 @@
 
     <div id="game-board"></div>
 
-    <div class="selection-counter" id="selection-counter">선택 수: 0 / 0</div>
+    <div class="selection-counter" id="selection-counter">0 / 0</div>
 
     <div id="overlay">
-        <h2 id="overlay-title">지뢰 오류 찾기</h2>
-        <div class="how-to" id="overlay-desc">
-            1. 지뢰의 위치를 기억하세요. <br>
-            2. 지뢰가 사라진 후 숫자 계산이 틀린 칸을 찾으세요. <br>
-            3. 틀린 칸만 모두 선택하면 성공입니다.
+        <div id="result-area" class="hidden">
+            <div class="final-score-box" id="final-score">0<span class="unit">점</span></div>
         </div>
         <button id="start-button" onclick="startGame()">게임 시작</button>
     </div>
@@ -166,32 +167,39 @@
         const timerBar = document.getElementById('timer-bar');
         const counterEl = document.getElementById('selection-counter');
         const overlay = document.getElementById('overlay');
-        const overlayTitle = document.getElementById('overlay-title');
-        const overlayDesc = document.getElementById('overlay-desc');
-        const startButton = document.getElementById('start-button');
+        const resultArea = document.getElementById('result-area');
+        const finalScoreEl = document.getElementById('final-score');
 
         function playSound() {
             clickSound.currentTime = 0;
             clickSound.play().catch(() => {});
         }
 
+        // 카운터 업데이트 및 애니메이션 제어
         function updateCounterUI() {
-            counterEl.textContent = `선택 수: ${state.selectedCells.size} / ${state.errorLocations.size}`;
+            counterEl.textContent = `${state.selectedCells.size} / ${state.errorLocations.size}`;
+        }
+
+        function triggerShake() {
+            counterEl.classList.remove('shake-effect');
+            void counterEl.offsetWidth; // 리플로우 유도
+            counterEl.classList.add('shake-effect');
+            setTimeout(() => counterEl.classList.remove('shake-effect'), 300);
         }
 
         function startGame() {
             state.rows = 3; state.cols = 3; state.mines = 1; state.score = 0; state.level = 1;
             overlay.classList.add('hidden');
+            resultArea.classList.add('hidden');
             startLevel();
         }
 
         function startLevel() {
             state.mineLocations.clear(); state.errorLocations.clear(); state.selectedCells.clear();
             state.phase = 'memorize';
-            updateCounterUI();
             
             boardEl.innerHTML = '';
-            boardEl.style.gridTemplateColumns = `repeat(${state.cols}, 50px)`;
+            boardEl.style.gridTemplateColumns = `repeat(${state.cols}, 55px)`;
             
             while(state.mineLocations.size < state.mines) {
                 state.mineLocations.add(Math.floor(Math.random() * state.rows) + "," + Math.floor(Math.random() * state.cols));
@@ -209,18 +217,18 @@
                 }
             }
             
-            statusEl.textContent = "지뢰 위치를 기억하세요";
+            updateCounterUI();
+            statusEl.textContent = "지뢰 위치 기억";
             timerBar.style.backgroundColor = '#f39c12'; 
             animateTimer(2000, enterPlayPhase, true);
         }
 
         function enterPlayPhase() {
             state.phase = 'play';
-            statusEl.textContent = "틀린 숫자를 찾으세요";
+            statusEl.textContent = "오류 찾기";
             timerBar.style.backgroundColor = '#3498db';
 
             const realValues = Array.from({ length: state.rows }, () => Array(state.cols).fill(0));
-
             state.mineLocations.forEach(loc => {
                 const [mr, mc] = loc.split(',').map(Number);
                 for (let r = mr - 1; r <= mr + 1; r++) {
@@ -232,19 +240,18 @@
                 }
             });
 
-            let errorCandidates = [];
+            let candidates = [];
             for(let r=0; r<state.rows; r++) {
                 for(let c=0; c<state.cols; c++) {
-                    if (!state.mineLocations.has(r + "," + c)) errorCandidates.push(r + "," + c);
+                    if (!state.mineLocations.has(r + "," + c)) candidates.push(r + "," + c);
                 }
             }
-            
-            errorCandidates.sort(() => Math.random() - 0.5);
-            for(let i=0; i < Math.min(state.mines, errorCandidates.length); i++) {
-                state.errorLocations.add(errorCandidates[i]);
+            candidates.sort(() => Math.random() - 0.5);
+            for(let i=0; i < Math.min(state.mines, candidates.length); i++) {
+                state.errorLocations.add(candidates[i]);
             }
 
-            updateCounterUI(); // 목표 수 표시
+            updateCounterUI();
 
             const cells = boardEl.children;
             let idx = 0;
@@ -265,16 +272,12 @@
                     cell.onclick = function() {
                         if (state.phase !== 'play') return;
                         const key = r + "," + c;
-                        
                         if (state.selectedCells.has(key)) {
                             state.selectedCells.delete(key);
                             cell.classList.remove('selected');
-                            statusEl.textContent = "틀린 숫자를 찾으세요";
                         } else {
                             if (state.selectedCells.size >= state.errorLocations.size) {
-                                statusEl.textContent = "더 이상 선택할 수 없습니다!";
-                                statusEl.style.color = "#e74c3c";
-                                setTimeout(() => { if(state.phase === 'play') statusEl.style.color = "#f1c40f"; }, 1000);
+                                triggerShake(); // 초과 시 좌우 흔들림
                                 return;
                             }
                             playSound();
@@ -285,9 +288,7 @@
                     };
                 }
             }
-
-            const playTime = 2000 + (state.mines * 800);
-            animateTimer(playTime, finishRound, true);
+            animateTimer(2000 + (state.mines * 800), finishRound, true);
         }
 
         function finishRound() {
@@ -296,12 +297,9 @@
             const cells = Array.from(boardEl.children);
             
             cells.forEach((cell, i) => {
-                const r = Math.floor(i / state.cols);
-                const c = i % state.cols;
-                const key = r + "," + c;
+                const key = Math.floor(i / state.cols) + "," + (i % state.cols);
                 const isSelected = state.selectedCells.has(key);
                 const isError = state.errorLocations.has(key);
-                
                 cell.classList.remove('selected'); 
                 if (isSelected && isError) { cell.classList.add('correct'); correct++; }
                 else if (isSelected && !isError) { cell.classList.add('wrong'); wrong++; }
@@ -309,24 +307,21 @@
             });
 
             if (correct === state.errorLocations.size && wrong === 0) {
-                const earnedScore = state.mines * state.level;
-                statusEl.textContent = `성공! +${earnedScore}점`;
+                statusEl.textContent = "성공!";
                 timerBar.style.backgroundColor = '#2ecc71';
                 animateTimer(1500, null, false);
-
                 setTimeout(() => {
-                    state.score += earnedScore; 
+                    state.score += (state.mines * state.level);
                     if (state.level % 2 !== 0) state.rows === state.cols ? state.cols++ : state.rows++;
                     else state.mines++;
                     state.level++;
                     startLevel();
                 }, 1500);
             } else {
-                statusEl.textContent = "게임 실패";
+                statusEl.textContent = "실패";
                 setTimeout(() => {
-                    overlayTitle.textContent = "최종 점수";
-                    overlayDesc.innerHTML = `<div class='final-score-box'>${state.score}<span class='unit'>점</span></div>`;
-                    startButton.textContent = "다시 시작하기";
+                    finalScoreEl.innerHTML = `${state.score}<span class="unit">점</span>`;
+                    resultArea.classList.remove('hidden');
                     overlay.classList.remove('hidden');
                 }, 1000);
             }
