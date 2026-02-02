@@ -144,14 +144,6 @@
     </style>
 </head>
 <body>
-    
-    <div class="game-title">지뢰 오류 찾기</div>
-    
-    <div class="info-panel">
-        <div>점수: <span id="score">0</span></div>
-        <div>찾을 오류: <span id="target-count">0</span></div>
-        <div>단계: <span id="level-display">1</span></div>
-    </div>
 
     <div class="status-msg" id="status-msg">준비하세요</div>
 
@@ -279,19 +271,14 @@
                     let val = state.mineLocations.has(r + "," + c) ? 0 : realValues[r][c];
 
                     if (state.errorLocations.has(r + "," + c)) {
-                        // --- 난이도 조절 부분 시작 ---
                         let offsets;
                         if (state.level <= 6) {
-                            // 6단계 이전: 변차 4, 5 (음수/양수 포함)
-                            offsets = [-5, -4, 4, 5];
-                        } else {
-                            // 7단계 이후: 변차 3, 4 (음수/양수 포함)
                             offsets = [-4, -3, 3, 4];
+                        } else {
+                            offsets = [-3, -2, 2, 3];
                         }
-                        // --- 난이도 조절 부분 끝 ---
 
                         const validOffsets = offsets.filter(off => (val + off >= 0) && (val + off <= 8));
-                        // 만약 유효한 offset이 없다면 최소/최대값으로 강제 설정
                         const finalOffset = validOffsets.length > 0 
                             ? validOffsets[Math.floor(Math.random() * validOffsets.length)]
                             : (val > 4 ? -3 : 3); 
@@ -317,7 +304,7 @@
                 }
             }
 
-            const playTime = 2000 + (state.mines * 1000);
+            const playTime = 2000 + (state.mines * 500);
             animateTimer(playTime, finishRound);
         }
 
@@ -348,7 +335,6 @@
             }
 
             if (correct === state.errorLocations.size && wrong === 0) {
-                // --- 점수 계산 방식 변경: 지뢰 개수 * 현재 레벨 ---
                 const earnedScore = state.mines * state.level;
                 statusEl.textContent = "성공! " + earnedScore + "점 획득";
                 
@@ -392,5 +378,6 @@
     </script>
 </body>
 </html>
+
 
 
