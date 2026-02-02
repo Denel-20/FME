@@ -373,7 +373,7 @@
                 const earnedScore = state.mines * state.level;
                 statusEl.textContent = `성공! ${earnedScore}점 획득`;
                 timerBar.style.backgroundColor = '#2ecc71';
-                animateTimer(1500, null, false);
+                animateTimer(1000, null, false);
 
                 setTimeout(function() {
                     state.score += earnedScore; 
@@ -381,7 +381,7 @@
                     else state.mines++;
                     state.level++;
                     startLevel();
-                }, 1500);
+                }, 1000);
             } else {
                 statusEl.textContent = "실패";
                 setTimeout(function() {
@@ -419,6 +419,7 @@
     </script>
 </body>
 </html>
+
 
 
 
