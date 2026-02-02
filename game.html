@@ -295,7 +295,7 @@
                     let val = state.mineLocations.has(r + "," + c) ? 0 : realValues[r][c];
 
                     if (state.errorLocations.has(r + "," + c)) {
-                        let offsets = state.level <= 6 ? [-5, -4, 4, 5] : [-4, -3, 3, 4];
+                        let offsets = state.level <= 6 ? [-4, -3, 3, 4] : [-3, -2, 2, 3];
                         const validOffsets = offsets.filter(off => (val + off >= 0) && (val + off <= 8));
                         const finalOffset = validOffsets.length > 0 
                             ? validOffsets[Math.floor(Math.random() * validOffsets.length)]
@@ -419,6 +419,7 @@
     </script>
 </body>
 </html>
+
 
 
 
