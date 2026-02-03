@@ -333,7 +333,7 @@
                 }
             }
         
-            const playTime = 2000 + (state.mines * 500) + (emptyErrorCount * 1000);
+            const playTime = 1500 + (state.mines * 1000) + (emptyErrorCount * 1000);
             animateTimer(playTime, finishRound, true);
         }
 
@@ -347,7 +347,7 @@
                 );
         
                 if (allCorrect) {
-                    state.timerSpeed = 1.5;
+                    state.timerSpeed = 1.35;
                 } else {
                     state.timerSpeed = 1.0;
                 }
@@ -445,5 +445,6 @@
     </script>
 </body>
 </html>
+
 
 
