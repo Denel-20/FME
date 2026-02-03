@@ -50,6 +50,7 @@
             height: 100%;
             width: 100%;
             background: var(--success);
+            transition: box-shadow 0.2s;
         }
 
         #game-board {
@@ -190,11 +191,7 @@
         let state = {
             rows: 3, cols: 3, mines: 1, score: 0, level: 1,
             mineLocations: new Set(), errorLocations: new Set(), selectedCells: new Set(),
-            phase: 'idle', timerInterval: null
-            timerSpeed: 1.0,
-            startTime: 0,
-            remainingDuration: 0,
-            currentTimerCallback: null
+            phase: 'idle', timerInterval: null, timerSpeed: 1.0
         };
 
         const boardEl = document.getElementById('game-board');
@@ -226,6 +223,7 @@
         function startLevel() {
             state.mineLocations.clear(); state.errorLocations.clear(); state.selectedCells.clear();
             state.phase = 'memorize';
+            state.timerSpeed = 1.0;
             updateUI();
             
             boardEl.innerHTML = '';
@@ -256,7 +254,7 @@
             state.phase = 'play';
             statusEl.textContent = "틀린 숫자를 모두 찾으세요";
             timerBar.style.backgroundColor = '#3498db';
-        
+
             const realValues = Array.from({ length: state.rows }, () => Array(state.cols).fill(0));
 
             state.mineLocations.forEach(loc => {
@@ -269,7 +267,7 @@
                     }
                 }
             });
-        
+
             let errorCandidates = [];
             for(let r=0; r<state.rows; r++) {
                 for(let c=0; c<state.cols; c++) {
@@ -282,10 +280,10 @@
             for(let i=0; i < targetErrorCount; i++) {
                 state.errorLocations.add(errorCandidates[i]);
             }
-        
+
             totalErrEl.textContent = state.errorLocations.size;
             updateSelectionUI();
-        
+
             const cells = boardEl.children;
             let idx = 0;
             for (let r = 0; r < state.rows; r++) {
@@ -294,17 +292,15 @@
                     cell.className = 'cell';
                     
                     let val = state.mineLocations.has(r + "," + c) ? 0 : realValues[r][c];
-        
+
                     if (state.errorLocations.has(r + "," + c)) {
                         let offsets = state.level <= 6 ? [-4, -3, 3, 4] : [-3, -2, 2, 3];
                         const validOffsets = offsets.filter(off => (val + off >= 0) && (val + off <= 8));
-                        
                         const finalOffset = validOffsets.length > 0 
                             ? validOffsets[Math.floor(Math.random() * validOffsets.length)]
                             : (val > 4 ? -3 : 3); 
-        
+
                         let newVal = val + finalOffset;
-        
                         if (newVal <= 0 || finalOffset < 0) {
                             cell.textContent = '';
                         } else {
@@ -334,13 +330,22 @@
                     };
                 }
             }
-        
+
             const playTime = 1500 + (state.mines * 1000);
             animateTimer(playTime, finishRound, true);
         }
 
         function updateSelectionUI() {
             currentSelEl.textContent = state.selectedCells.size;
+
+            if (state.level <= 6 && state.selectedCells.size > 0) {
+                const allCorrectSoFar = Array.from(state.selectedCells).every(key => 
+                    state.errorLocations.has(key)
+                );
+                state.timerSpeed = allCorrectSoFar ? 1.3 : 1.0;
+            } else {
+                state.timerSpeed = 1.0;
+            }
         }
 
         function triggerShake() {
@@ -379,6 +384,7 @@
                 const earnedScore = state.mines * state.level;
                 statusEl.textContent = `성공! ${earnedScore}점 획득`;
                 timerBar.style.backgroundColor = '#2ecc71';
+                timerBar.style.boxShadow = "none";
                 animateTimer(1000, null, false);
 
                 setTimeout(function() {
@@ -390,6 +396,7 @@
                 }, 1000);
             } else {
                 statusEl.textContent = "실패";
+                timerBar.style.boxShadow = "none";
                 setTimeout(function() {
                     overlayTitle.textContent = "게임 오버";
                     overlayDesc.innerHTML = `<div class='final-score-box'>${state.score}<span class='unit'>점</span></div>`;
@@ -399,48 +406,32 @@
             }
         }
 
-        function updateSelectionUI() {
-            currentSelEl.textContent = state.selectedCells.size;
-            
-            if (state.level <= 6 && state.selectedCells.size > 0) {
-                const allCorrectSoFar = Array.from(state.selectedCells).every(key => 
-                    state.errorLocations.has(key)
-                );
-        
-                if (allCorrectSoFar) {
-                    state.timerSpeed = 1.3;
-                } else {
-                    state.timerSpeed = 1.0;
-                }
-            } else {
-                state.timerSpeed = 1.0;
-            }
+        function updateUI() {
+            totalErrEl.textContent = state.mines; 
+            currentSelEl.textContent = "0";
         }
-        
+
         function animateTimer(duration, callback, isDecreasing) {
             if (state.timerInterval) cancelAnimationFrame(state.timerInterval);
-            
             let elapsed = 0;
             let lastTimestamp = null;
-            state.timerSpeed = 1.0;
-        
+            
             function step(timestamp) {
                 if (!lastTimestamp) lastTimestamp = timestamp;
-                
                 const deltaTime = (timestamp - lastTimestamp) * state.timerSpeed;
                 elapsed += deltaTime;
                 lastTimestamp = timestamp;
-        
+
                 let ratio = Math.min(1, elapsed / duration);
                 let widthPercent = isDecreasing ? (1 - ratio) * 100 : ratio * 100;
                 timerBar.style.width = widthPercent + '%';
-        
-                if (state.timerSpeed > 1.0) {
+
+                if (state.timerSpeed > 1.0 && isDecreasing) {
                     timerBar.style.boxShadow = "0 0 10px #e74c3c";
                 } else {
                     timerBar.style.boxShadow = "none";
                 }
-        
+
                 if (elapsed < duration) {
                     state.timerInterval = requestAnimationFrame(step);
                 } else if (callback) {
@@ -452,8 +443,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
