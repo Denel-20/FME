@@ -191,6 +191,10 @@
             rows: 3, cols: 3, mines: 1, score: 0, level: 1,
             mineLocations: new Set(), errorLocations: new Set(), selectedCells: new Set(),
             phase: 'idle', timerInterval: null
+            timerSpeed: 1.0,
+            startTime: 0,
+            remainingDuration: 0,
+            currentTimerCallback: null
         };
 
         const boardEl = document.getElementById('game-board');
@@ -395,22 +399,49 @@
             }
         }
 
-        function updateUI() {
-            totalErrEl.textContent = state.mines; 
-            currentSelEl.textContent = "0";
+        function updateSelectionUI() {
+            currentSelEl.textContent = state.selectedCells.size;
+            
+            if (state.level <= 6 && state.selectedCells.size > 0) {
+                const allCorrectSoFar = Array.from(state.selectedCells).every(key => 
+                    state.errorLocations.has(key)
+                );
+        
+                if (allCorrectSoFar) {
+                    state.timerSpeed = 1.3;
+                } else {
+                    state.timerSpeed = 1.0;
+                }
+            } else {
+                state.timerSpeed = 1.0;
+            }
         }
-
+        
         function animateTimer(duration, callback, isDecreasing) {
             if (state.timerInterval) cancelAnimationFrame(state.timerInterval);
-            let start = null;
+            
+            let elapsed = 0;
+            let lastTimestamp = null;
+            state.timerSpeed = 1.0;
+        
             function step(timestamp) {
-                if (!start) start = timestamp;
-                const progress = timestamp - start;
-                let ratio = Math.min(1, progress / duration);
+                if (!lastTimestamp) lastTimestamp = timestamp;
+                
+                const deltaTime = (timestamp - lastTimestamp) * state.timerSpeed;
+                elapsed += deltaTime;
+                lastTimestamp = timestamp;
+        
+                let ratio = Math.min(1, elapsed / duration);
                 let widthPercent = isDecreasing ? (1 - ratio) * 100 : ratio * 100;
                 timerBar.style.width = widthPercent + '%';
-
-                if (progress < duration) {
+        
+                if (state.timerSpeed > 1.0) {
+                    timerBar.style.boxShadow = "0 0 10px #e74c3c";
+                } else {
+                    timerBar.style.boxShadow = "none";
+                }
+        
+                if (elapsed < duration) {
                     state.timerInterval = requestAnimationFrame(step);
                 } else if (callback) {
                     callback();
@@ -421,6 +452,7 @@
     </script>
 </body>
 </html>
+
 
 
 
