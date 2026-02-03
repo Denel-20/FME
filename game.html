@@ -254,9 +254,9 @@
             state.phase = 'play';
             statusEl.textContent = "틀린 숫자를 모두 찾으세요";
             timerBar.style.backgroundColor = '#3498db';
-
+        
             const realValues = Array.from({ length: state.rows }, () => Array(state.cols).fill(0));
-
+        
             state.mineLocations.forEach(loc => {
                 const [mr, mc] = loc.split(',').map(Number);
                 for (let r = mr - 1; r <= mr + 1; r++) {
@@ -267,7 +267,7 @@
                     }
                 }
             });
-
+        
             let errorCandidates = [];
             for(let r=0; r<state.rows; r++) {
                 for(let c=0; c<state.cols; c++) {
@@ -280,10 +280,11 @@
             for(let i=0; i < targetErrorCount; i++) {
                 state.errorLocations.add(errorCandidates[i]);
             }
-
+        
             totalErrEl.textContent = state.errorLocations.size;
             updateSelectionUI();
-
+        
+            let emptyErrorCount = 0;
             const cells = boardEl.children;
             let idx = 0;
             for (let r = 0; r < state.rows; r++) {
@@ -292,17 +293,18 @@
                     cell.className = 'cell';
                     
                     let val = state.mineLocations.has(r + "," + c) ? 0 : realValues[r][c];
-
+        
                     if (state.errorLocations.has(r + "," + c)) {
                         let offsets = state.level <= 6 ? [-4, -3, 3, 4] : [-3, -2, 2, 3];
                         const validOffsets = offsets.filter(off => (val + off >= 0) && (val + off <= 8));
                         const finalOffset = validOffsets.length > 0 
                             ? validOffsets[Math.floor(Math.random() * validOffsets.length)]
                             : (val > 4 ? -3 : 3); 
-
+        
                         let newVal = val + finalOffset;
                         if (newVal <= 0 || finalOffset < 0) {
                             cell.textContent = '';
+                            emptyErrorCount++;
                         } else {
                             cell.textContent = newVal;
                         }
@@ -330,8 +332,8 @@
                     };
                 }
             }
-
-            const playTime = 1500 + (state.mines * 1000);
+        
+            const playTime = 2000 + (state.mines * 500) + (emptyErrorCount * 1000);
             animateTimer(playTime, finishRound, true);
         }
 
@@ -432,12 +434,6 @@
                 let widthPercent = isDecreasing ? (1 - ratio) * 100 : ratio * 100;
                 timerBar.style.width = widthPercent + '%';
 
-                if (state.timerSpeed > 1.0 && isDecreasing) {
-                    timerBar.style.boxShadow = "0 0 10px #e74c3c";
-                } else {
-                    timerBar.style.boxShadow = "none";
-                }
-
                 if (elapsed < duration) {
                     state.timerInterval = requestAnimationFrame(step);
                 } else if (callback) {
@@ -449,4 +445,5 @@
     </script>
 </body>
 </html>
+
 
