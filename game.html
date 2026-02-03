@@ -337,12 +337,18 @@
 
         function updateSelectionUI() {
             currentSelEl.textContent = state.selectedCells.size;
-
-            if (state.level <= 6 && state.selectedCells.size > 0) {
-                const allCorrectSoFar = Array.from(state.selectedCells).every(key => 
+        
+            if (state.level <= 6 && state.selectedCells.size === state.errorLocations.size) {
+                
+                const allCorrect = Array.from(state.selectedCells).every(key => 
                     state.errorLocations.has(key)
                 );
-                state.timerSpeed = allCorrectSoFar ? 1.3 : 1.0;
+        
+                if (allCorrect) {
+                    state.timerSpeed = 1.5;
+                } else {
+                    state.timerSpeed = 1.0;
+                }
             } else {
                 state.timerSpeed = 1.0;
             }
@@ -443,3 +449,4 @@
     </script>
 </body>
 </html>
+
