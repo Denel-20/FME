@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>지뢰 오류 찾기</title>
+    <title>지뢰 오류 찾기 - Sound Edition</title>
     <style>
         :root {
             --bg-color: #2c3e50;
@@ -30,138 +30,111 @@
             touch-action: manipulation;
         }
 
-        .status-msg {
-            height: 30px;
-            font-weight: bold;
-            color: #f1c40f;
-            margin-bottom: 10px;
-            font-size: 20px;
+        /* 설정 버튼 및 모달 스타일 */
+        #settings-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            z-index: 100;
+            background: rgba(0,0,0,0.2);
+            padding: 8px;
+            border-radius: 12px;
+            transition: background 0.3s;
+        }
+        #settings-btn:hover { background: rgba(0,0,0,0.4); }
+
+        #settings-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(44, 62, 80, 0.98);
+            padding: 25px;
+            border-radius: 20px;
+            z-index: 200;
+            min-width: 280px;
+            display: none;
+            box-shadow: 0 0 30px rgba(0,0,0,0.5);
+            border: 2px solid var(--cell-selected);
         }
 
-        .timer-bar-container {
-            width: 300px;
-            height: 10px;
-            background: #555;
-            border-radius: 5px;
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-        .timer-bar {
-            height: 100%;
-            width: 100%;
-            background: var(--success);
-            transition: box-shadow 0.2s;
-        }
+        .setting-item { margin-bottom: 20px; }
+        .setting-item label { display: block; margin-bottom: 8px; font-weight: bold; font-size: 14px; }
+        .setting-item input[type="range"] { width: 100%; cursor: pointer; }
 
-        #game-board {
-            display: grid;
-            gap: 4px;
-            background-color: var(--board-bg);
+        .credit-link {
+            font-size: 11px;
+            color: #bdc3c7;
+            text-decoration: none;
+            display: block;
+            margin-top: 15px;
+            text-align: center;
+            line-height: 1.4;
+        }
+        .credit-link:hover { color: var(--success); }
+
+        .close-btn {
+            background: var(--cell-selected);
+            border: none;
+            color: white;
             padding: 10px;
             border-radius: 8px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-        }
-
-        .cell {
-            width: 50px;
-            height: 50px;
-            background-color: var(--cell-bg);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: bold;
-            color: #2c3e50;
             cursor: pointer;
-            border-radius: 4px;
-            box-sizing: border-box;
-            border: none;
+            width: 100%;
+            margin-top: 10px;
+            font-weight: bold;
         }
 
+        /* 게임 요소 스타일 */
+        .status-msg { height: 30px; font-weight: bold; color: #f1c40f; margin-bottom: 10px; font-size: 20px; }
+        .timer-bar-container { width: 300px; height: 10px; background: #555; border-radius: 5px; margin-bottom: 20px; overflow: hidden; }
+        .timer-bar { height: 100%; width: 100%; background: var(--success); transition: box-shadow 0.2s; }
+        #game-board { display: grid; gap: 4px; background-color: var(--board-bg); padding: 10px; border-radius: 8px; box-shadow: 0 10px 20px rgba(0,0,0,0.3); }
+        .cell { width: 50px; height: 50px; background-color: var(--cell-bg); display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: bold; color: #2c3e50; cursor: pointer; border-radius: 4px; box-sizing: border-box; }
         .cell.mine { background-color: var(--accent); color: white; }
         .cell.selected { background-color: var(--cell-selected); color: white; }
         .cell.correct { background-color: var(--success); color: white; }
         .cell.wrong { background-color: var(--accent); color: white; }
         .cell.missed { background-color: var(--missed); color: white; }
-
-        .selection-counter {
-            margin-top: 20px;
-            font-size: 24px;
-            font-weight: 800;
-            padding: 12px 25px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 30px;
-            color: var(--text-color);
-            transition: color 0.3s ease;
-        }
-
-        .selection-counter.error {
-            color: var(--accent) !important;
-            animation: shake 0.4s ease-in-out;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            15% { transform: translateX(-10px); }
-            30% { transform: translateX(10px); }
-            45% { transform: translateX(-10px); }
-            60% { transform: translateX(10px); }
-            75% { transform: translateX(-5px); }
-            85% { transform: translateX(5px); }
-        }
-
-        #overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.95);
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 10; padding: 20px;
-        }
-
-        .overlay-game-title {
-            font-size: 30px;
-            font-weight: 900;
-            color: #f1c40f;
-            text-shadow: 3px 3px 10px rgba(0,0,0,0.5);
-            margin-bottom: 10px;
-            letter-spacing: -1px;
-        }
-
-        #overlay h2 {
-            color: #ffffff;
-            font-size: 25px;
-            opacity: 0.8;
-            margin-top: 10px;
-            margin-bottom: 0px;
-        }
+        .selection-counter { margin-top: 20px; font-size: 24px; font-weight: 800; padding: 12px 25px; background: rgba(0,0,0,0.3); border-radius: 30px; }
+        .selection-counter.error { color: var(--accent) !important; animation: shake 0.4s ease-in-out; }
         
-        .how-to {
-            max-width: 450px; 
-            text-align: center; 
-            line-height: 1.8;
-            background: rgba(255, 255, 255, 0.05); 
-            padding: 20px;
-            border-radius: 15px; 
-            margin-top: 0;
-            margin-bottom: 20px; 
-            font-size: 15px;
+        @keyframes shake { 
+            0%, 100% { transform: translateX(0); } 15% { transform: translateX(-10px); } 30% { transform: translateX(10px); } 
+            45% { transform: translateX(-10px); } 60% { transform: translateX(10px); } 75% { transform: translateX(-5px); }
         }
 
-        .final-score-box {
-            font-size: 75px; font-weight: 800; color: #f1c40f;
-            text-shadow: 0 0 20px rgba(241, 196, 15, 0.5);
-        }
-        .final-score-box span.unit { font-size: 0.3em; margin-left: 8px; color: #f1c40f; }
-
-        #start-button {
-            padding: 15px 50px; font-size: 22px; background-color: var(--success);
-            color: white; border: none; border-radius: 50px; cursor: pointer;
-            font-weight: bold; box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
-        }
-
+        #overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 10; padding: 20px; }
+        .overlay-game-title { font-size: 30px; font-weight: 900; color: #f1c40f; margin-bottom: 10px; }
+        .how-to { max-width: 450px; text-align: center; line-height: 1.8; background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 15px; font-size: 15px; margin-bottom: 20px;}
+        .final-score-box { font-size: 75px; font-weight: 800; color: #f1c40f; }
+        #start-button { padding: 15px 50px; font-size: 22px; background-color: var(--success); color: white; border: none; border-radius: 50px; cursor: pointer; font-weight: bold; box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4); }
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
+
+    <div id="settings-btn" onclick="toggleSettings()">⚙️</div>
+
+    <div id="settings-modal">
+        <h3 style="margin-top:0; color:var(--success);">Game Settings</h3>
+        <div class="setting-item">
+            <label>배경 음악 (BGM)</label>
+            <input type="range" id="bgm-volume" min="0" max="1" step="0.1" value="0.5" oninput="updateVolumes()">
+        </div>
+        <div class="setting-item">
+            <label>효과음 (SFX)</label>
+            <input type="range" id="sfx-volume" min="0" max="1" step="0.1" value="0.7" oninput="updateVolumes()">
+        </div>
+        <hr style="border: 0.5px solid #444;">
+        <a href="https://youtu.be/zPw3K_fRwvU" target="_blank" class="credit-link">
+            🎵 Music by HeatleyBros<br>"8 Bit Arcade"
+        </a>
+        <button class="close-btn" onclick="toggleSettings()">닫기</button>
+    </div>
+
     <div class="status-msg" id="status-msg">준비하세요</div>
 
     <div class="timer-bar-container">
@@ -178,15 +151,17 @@
         <div class="overlay-game-title">지뢰 오류 찾기</div>
         <h2 id="overlay-title">게임 설명</h2>
         <div class="how-to" id="overlay-desc">
-            <p><strong>1단계</strong> : 게임 시작 후 나타나는 폭탄의 위치를 정해진 시간 동안 기억합니다.</p>
-            <p><strong>2단계</strong> : 폭탄이 숫자로 가려지면, 주변 폭탄 개수와 맞지 않는 틀린 숫자 칸을 찾아 클릭합니다.</p>
-            <p><strong>3단계</strong> : 모든 오류를 정확히 찾아내면 다음 단계로 넘어가며, 난이도와 획득 점수가 함께 올라갑니다.</p>
+            <p><strong>1단계</strong> : 나타나는 폭탄 위치를 기억하세요.</p>
+            <p><strong>2단계</strong> : 폭탄이 가려지면, 주변 개수와 맞지 않는 <strong>틀린 숫자</strong>를 모두 클릭하세요.</p>
         </div>
         <button id="start-button" onclick="startGame()">게임 시작</button>
     </div>
 
     <script>
-        const clickSound = new Audio('buttonSound.mp3');
+        // --- 사운드 설정 ---
+        const bgm = new Audio('8bit_arcade.mp3'); 
+        bgm.loop = true;
+        const sfx = new Audio('buttonSound.mp3');
 
         let state = {
             rows: 3, cols: 3, mines: 1, score: 0, level: 1,
@@ -201,22 +176,31 @@
         const overlayTitle = document.getElementById('overlay-title');
         const overlayDesc = document.getElementById('overlay-desc');
         const startButton = document.getElementById('start-button');
-        const selectionDisplay = document.getElementById('selection-display');
         const currentSelEl = document.getElementById('current-sel');
         const totalErrEl = document.getElementById('total-err');
 
-        selectionDisplay.addEventListener('animationend', () => {
-            selectionDisplay.classList.remove('error');
-        });
+        function toggleSettings() {
+            const modal = document.getElementById('settings-modal');
+            modal.style.display = modal.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function updateVolumes() {
+            bgm.volume = document.getElementById('bgm-volume').value;
+            sfx.volume = document.getElementById('sfx-volume').value;
+        }
 
         function playSound() {
-            clickSound.currentTime = 0;
-            clickSound.play().catch(() => {});
+            sfx.currentTime = 0;
+            sfx.play().catch(() => {});
         }
 
         function startGame() {
             state.rows = 3; state.cols = 3; state.mines = 1; state.score = 0; state.level = 1;
             overlay.classList.add('hidden');
+            
+            // BGM 시작 (사용자 인터랙션 후 재생)
+            bgm.play().catch(() => {});
+            updateVolumes();
             startLevel();
         }
 
@@ -256,7 +240,6 @@
             timerBar.style.backgroundColor = '#3498db';
         
             const realValues = Array.from({ length: state.rows }, () => Array(state.cols).fill(0));
-        
             state.mineLocations.forEach(loc => {
                 const [mr, mc] = loc.split(',').map(Number);
                 for (let r = mr - 1; r <= mr + 1; r++) {
@@ -274,7 +257,6 @@
                     errorCandidates.push(r + "," + c);
                 }
             }
-            
             errorCandidates.sort(() => Math.random() - 0.5);
             const targetErrorCount = Math.min(state.mines, errorCandidates.length);
             for(let i=0; i < targetErrorCount; i++) {
@@ -284,30 +266,19 @@
             totalErrEl.textContent = state.errorLocations.size;
             updateSelectionUI();
         
-            let emptyErrorCount = 0;
             const cells = boardEl.children;
             let idx = 0;
             for (let r = 0; r < state.rows; r++) {
                 for (let c = 0; c < state.cols; c++) {
                     const cell = cells[idx++];
                     cell.className = 'cell';
-                    
                     let val = state.mineLocations.has(r + "," + c) ? 0 : realValues[r][c];
-        
+
                     if (state.errorLocations.has(r + "," + c)) {
                         let offsets = state.level <= 6 ? [-4, -3, 3, 4] : [-3, -2, 2, 3];
                         const validOffsets = offsets.filter(off => (val + off >= 0) && (val + off <= 8));
-                        const finalOffset = validOffsets.length > 0 
-                            ? validOffsets[Math.floor(Math.random() * validOffsets.length)]
-                            : (val > 4 ? -3 : 3); 
-        
-                        let newVal = val + finalOffset;
-                        if (newVal <= 0 || finalOffset < 0) {
-                            cell.textContent = '';
-                            emptyErrorCount++;
-                        } else {
-                            cell.textContent = newVal;
-                        }
+                        const finalOffset = validOffsets.length > 0 ? validOffsets[Math.floor(Math.random() * validOffsets.length)] : 3;
+                        cell.textContent = (val + finalOffset <= 0) ? '' : val + finalOffset;
                     } else {
                         cell.textContent = val === 0 ? '' : val;
                     }
@@ -315,15 +286,11 @@
                     cell.onclick = function() {
                         if (state.phase !== 'play') return;
                         const key = r + "," + c;
-                        
                         if (state.selectedCells.has(key)) {
                             state.selectedCells.delete(key);
                             cell.classList.remove('selected');
                         } else {
-                            if (state.selectedCells.size >= state.errorLocations.size) {
-                                triggerShake();
-                                return;
-                            }
+                            if (state.selectedCells.size >= state.errorLocations.size) return;
                             state.selectedCells.add(key);
                             cell.classList.add('selected');
                         }
@@ -332,39 +299,12 @@
                     };
                 }
             }
-        
-            const playTime = 2000 + (state.mines * 1000) + (emptyErrorCount * 1000);
-            animateTimer(playTime, finishRound, true);
-        }
-
-        function updateSelectionUI() {
-            currentSelEl.textContent = state.selectedCells.size;
-        
-            if (state.level <= 6 && state.selectedCells.size === state.errorLocations.size) {
-                
-                const allCorrect = Array.from(state.selectedCells).every(key => 
-                    state.errorLocations.has(key)
-                );
-        
-                if (allCorrect) {
-                    state.timerSpeed = 1.3;
-                } else {
-                    state.timerSpeed = 1.0;
-                }
-            } else {
-                state.timerSpeed = 1.0;
-            }
-        }
-
-        function triggerShake() {
-            selectionDisplay.classList.remove('error');
-            void selectionDisplay.offsetWidth;
-            selectionDisplay.classList.add('error');
+            animateTimer(2000 + (state.mines * 1000), finishRound, true);
         }
 
         function finishRound() {
             state.phase = 'result';
-            let correct = 0, wrong = 0;
+            let correct = 0;
             const cells = boardEl.children;
             let idx = 0;
             for (let r = 0; r < state.rows; r++) {
@@ -373,79 +313,51 @@
                     const key = r + "," + c;
                     const isSelected = state.selectedCells.has(key);
                     const isError = state.errorLocations.has(key);
-                    
-                    cell.classList.remove('selected'); 
-                    
-                    if (isSelected && isError) {
-                        cell.classList.add('correct');
-                        correct++;
-                    } else if (isSelected && !isError) {
-                        cell.classList.add('wrong');
-                        wrong++;
-                    } else if (!isSelected && isError) {
-                        cell.classList.add('missed');
-                    }
+                    cell.classList.remove('selected');
+                    if (isSelected && isError) { cell.classList.add('correct'); correct++; }
+                    else if (isSelected && !isError) { cell.classList.add('wrong'); }
+                    else if (!isSelected && isError) { cell.classList.add('missed'); }
                 }
             }
 
-            if (correct === state.errorLocations.size && wrong === 0) {
-                const earnedScore = state.mines * state.level;
-                statusEl.textContent = `성공! ${earnedScore}점 획득`;
-                timerBar.style.backgroundColor = '#2ecc71';
-                timerBar.style.boxShadow = "none";
-                animateTimer(1000, null, false);
-
-                setTimeout(function() {
-                    state.score += earnedScore; 
+            if (correct === state.errorLocations.size && state.selectedCells.size === correct) {
+                state.score += (state.mines * state.level);
+                statusEl.textContent = "성공!";
+                timerBar.style.backgroundColor = var(--success);
+                setTimeout(() => { 
                     if (state.level % 2 !== 0) state.rows === state.cols ? state.cols++ : state.rows++;
                     else state.mines++;
                     state.level++;
-                    startLevel();
+                    startLevel(); 
                 }, 1000);
             } else {
                 statusEl.textContent = "실패";
-                timerBar.style.boxShadow = "none";
-                setTimeout(function() {
+                setTimeout(() => {
                     overlayTitle.textContent = "게임 오버";
-                    overlayDesc.innerHTML = `<div class='final-score-box'>${state.score}<span class='unit'>점</span></div>`;
-                    startButton.textContent = "다시 시작하기";
+                    overlayDesc.innerHTML = `<div class='final-score-box'>${state.score}<span style="font-size:20px;">점</span></div>`;
+                    startButton.textContent = "다시 도전하기";
                     overlay.classList.remove('hidden');
                 }, 1000);
             }
         }
 
-        function updateUI() {
-            totalErrEl.textContent = state.mines; 
-            currentSelEl.textContent = "0";
-        }
+        function updateSelectionUI() { currentSelEl.textContent = state.selectedCells.size; }
+        function updateUI() { totalErrEl.textContent = state.mines; currentSelEl.textContent = "0"; }
 
         function animateTimer(duration, callback, isDecreasing) {
             if (state.timerInterval) cancelAnimationFrame(state.timerInterval);
-            let elapsed = 0;
-            let lastTimestamp = null;
-            
+            let elapsed = 0; let lastTimestamp = null;
             function step(timestamp) {
                 if (!lastTimestamp) lastTimestamp = timestamp;
-                const deltaTime = (timestamp - lastTimestamp) * state.timerSpeed;
-                elapsed += deltaTime;
+                elapsed += (timestamp - lastTimestamp) * state.timerSpeed;
                 lastTimestamp = timestamp;
-
                 let ratio = Math.min(1, elapsed / duration);
-                let widthPercent = isDecreasing ? (1 - ratio) * 100 : ratio * 100;
-                timerBar.style.width = widthPercent + '%';
-
-                if (elapsed < duration) {
-                    state.timerInterval = requestAnimationFrame(step);
-                } else if (callback) {
-                    callback();
-                }
+                timerBar.style.width = (isDecreasing ? (1 - ratio) : ratio) * 100 + '%';
+                if (elapsed < duration) state.timerInterval = requestAnimationFrame(step);
+                else if (callback) callback();
             }
             state.timerInterval = requestAnimationFrame(step);
         }
     </script>
 </body>
 </html>
-
-
-
-
