@@ -130,7 +130,7 @@
         </div>
         <hr style="border: 0.5px solid #444;">
         <a href="https://youtu.be/zPw3K_fRwvU" target="_blank" class="credit-link">
-            🎵 Music by HeatleyBros<br>"8 Bit Arcade"
+            Music by HeatleyBros<br>"8 Bit Arcade"
         </a>
         <button class="close-btn" onclick="toggleSettings()">닫기</button>
     </div>
@@ -158,7 +158,6 @@
     </div>
 
     <script>
-        // --- 사운드 설정 ---
         const bgm = new Audio('8bit_arcade.mp3'); 
         bgm.loop = true;
         const sfx = new Audio('buttonSound.mp3');
@@ -198,7 +197,6 @@
             state.rows = 3; state.cols = 3; state.mines = 1; state.score = 0; state.level = 1;
             overlay.classList.add('hidden');
             
-            // BGM 시작 (사용자 인터랙션 후 재생)
             bgm.play().catch(() => {});
             updateVolumes();
             startLevel();
@@ -223,7 +221,7 @@
                     cell.className = 'cell';
                     if (state.mineLocations.has(r + "," + c)) {
                         cell.classList.add('mine');
-                        cell.textContent = '⊙';
+                        cell.textContent = '!';
                     }
                     boardEl.appendChild(cell);
                 }
@@ -361,3 +359,4 @@
     </script>
 </body>
 </html>
+
