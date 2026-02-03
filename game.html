@@ -250,85 +250,93 @@
 
         function enterPlayPhase() {
             state.phase = 'play';
-            statusEl.textContent = "틀린 숫자를 모두 찾으세요";
+            statusEl.textContent = "숫자가 틀린 곳을 찾으세요!";
             timerBar.style.backgroundColor = '#3498db';
 
             const realValues = Array.from({ length: state.rows }, () => Array(state.cols).fill(0));
 
-            state.mineLocations.forEach(loc => {
-                const [mr, mc] = loc.split(',').map(Number);
-                for (let r = mr - 1; r <= mr + 1; r++) {
-                    for (let c = mc - 1; c <= mc + 1; c++) {
-                        if (r >= 0 && r < state.rows && c >= 0 && c < state.cols && (r !== mr || c !== mc)) {
-                            realValues[r][c]++;
+            for (let r = 0; r < state.rows; r++) {
+                for (let c = 0; c < state.cols; c++) {
+                    if (state.mineLocations.has(r + "," + c)) continue;
+        
+                    let count = 0;
+                    for (let dr = -1; dr <= 1; dr++) {
+                        for (let dc = -1; dc <= 1; dc++) {
+                            const nr = r + dr, nc = c + dc;
+                            if (nr >= 0 && nr < state.rows && nc >= 0 && nc < state.cols) {
+                                if (state.mineLocations.has(nr + "," + nc)) count++;
+                            }
                         }
                     }
+                    realValues[r][c] = count;
                 }
-            });
+            }
 
             let errorCandidates = [];
             for(let r=0; r<state.rows; r++) {
                 for(let c=0; c<state.cols; c++) {
                     if (!state.mineLocations.has(r + "," + c)) {
-                        errorCandidates.push(r + "," + c);
+                        errorCandidates.push({r, c});
                     }
                 }
             }
             
             errorCandidates.sort(() => Math.random() - 0.5);
-            const targetErrorCount = Math.min(state.mines, errorCandidates.length);
+            const targetErrorCount = Math.max(1, Math.min(state.mines, errorCandidates.length));
+            
+            state.errorLocations.clear();
             for(let i=0; i < targetErrorCount; i++) {
-                state.errorLocations.add(errorCandidates[i]);
+                const pos = errorCandidates[i];
+                state.errorLocations.add(pos.r + "," + pos.c);
             }
-
+        
             totalErrEl.textContent = state.errorLocations.size;
             updateSelectionUI();
-
+        
             const cells = boardEl.children;
             let idx = 0;
             for (let r = 0; r < state.rows; r++) {
                 for (let c = 0; c < state.cols; c++) {
                     const cell = cells[idx++];
+                    const key = r + "," + c;
                     cell.className = 'cell';
                     
-                    let val = state.mineLocations.has(r + "," + c) ? 0 : realValues[r][c];
-
-                    if (state.errorLocations.has(r + "," + c)) {
-                        let offsets = state.level <= 6 ? [-4, -3, 3, 4] : [-3, -2, 2, 3];
-                        const validOffsets = offsets.filter(off => (val + off >= 0) && (val + off <= 8));
-                        const finalOffset = validOffsets.length > 0 
-                            ? validOffsets[Math.floor(Math.random() * validOffsets.length)]
-                            : (val > 4 ? -3 : 3); 
-
-                        let newVal = val + finalOffset;
-                        cell.textContent = newVal === 0 ? '' : newVal;
+                    if (state.mineLocations.has(key)) {
+                        cell.textContent = ''; 
                     } else {
-                        cell.textContent = val === 0 ? '' : val;
+                        let val = realValues[r][c];
+                        if (state.errorLocations.has(key)) {
+                            let offset = (val === 0) ? 1 : (Math.random() > 0.5 ? 1 : -1);
+                            cell.textContent = val + offset;
+                        } else {
+                            cell.textContent = val === 0 ? '' : val;
+                        }
                     }
                     
-                    cell.onclick = function() {
-                        if (state.phase !== 'play') return;
-                        const key = r + "," + c;
-                        
-                        if (state.selectedCells.has(key)) {
-                            state.selectedCells.delete(key);
-                            cell.classList.remove('selected');
-                            playSound();
-                        } else {
-                            if (state.selectedCells.size >= state.errorLocations.size) {
-                                triggerShake();
-                                return;
+                    cell.onclick = (function(row, col, targetCell) {
+                        return function() {
+                            if (state.phase !== 'play') return;
+                            const k = row + "," + col;
+                            
+                            if (state.selectedCells.has(k)) {
+                                state.selectedCells.delete(k);
+                                targetCell.classList.remove('selected');
+                            } else {
+                                if (state.selectedCells.size >= state.errorLocations.size) {
+                                    triggerShake();
+                                    return;
+                                }
+                                state.selectedCells.add(k);
+                                targetCell.classList.add('selected');
                             }
-                            state.selectedCells.add(key);
-                            cell.classList.add('selected');
                             playSound();
-                        }
-                        updateSelectionUI();
-                    };
+                            updateSelectionUI();
+                        };
+                    })(r, c, cell);
                 }
             }
-
-            const playTime = 1500 + (state.mines * 1000);
+        
+            const playTime = 3000 + (state.level * 500); 
             animateTimer(playTime, finishRound, true);
         }
 
@@ -418,5 +426,6 @@
     </script>
 </body>
 </html>
+
 
 
