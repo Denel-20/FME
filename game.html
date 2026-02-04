@@ -187,6 +187,11 @@
 
     <script>
         const clickSound = new Audio('buttonSound.mp3');
+        clickSound.volume = 0.5;
+        
+        const bgmSound = new Audio('bgm.mp3');
+        bgmSound.loop = true;
+        bgmSound.volume = 1.0;
 
         let state = {
             rows: 3, cols: 3, mines: 1, score: 0, level: 1,
@@ -215,6 +220,7 @@
         }
 
         function startGame() {
+            bgmSound.play().catch(e => console.log("Audio play failed:", e));
             state.rows = 3; state.cols = 3; state.mines = 1; state.score = 0; state.level = 1;
             overlay.classList.add('hidden');
             startLevel();
@@ -445,3 +451,4 @@
     </script>
 </body>
 </html>
+
